@@ -44,13 +44,30 @@ INSTALLED_APPS = [
 
     # 설치한 라이브러리
     'rest_framework',
+    'rest_framework.authtoken',
     'rest_framework_simplejwt',
+    'dj_rest_auth',
+    'dj_rest_auth.registration',
 
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',   # allauth.socialaccount.providers.소셜로그인제공업체
 ]
+
+# 사이트는 1개만 사용할 것이라고 명시
+SITE_ID = 1
 
 # user 앱에서 내가 설정한 User를 사용하겠다고 설정
 AUTH_USER_MODEL = 'user.User'
 
+REST_USE_JWT = True
+
+# 기존의 username 필드가 있던 User 모델에서 email만 사용하도록 커스터마이징함
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None    # username 필드 사용 x
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
 
 # jwt 토큰은 simplejwt의 JWTAuthentication으로 인증
 
