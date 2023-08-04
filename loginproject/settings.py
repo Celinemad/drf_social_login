@@ -38,6 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # sites 설정해줘야 admin에 sites 항목 생김
+    'django.contrib.sites',
 
     # 생성한 앱
     'user',
@@ -61,9 +63,10 @@ SITE_ID = 1
 # user 앱에서 내가 설정한 User를 사용하겠다고 설정
 AUTH_USER_MODEL = 'user.User'
 
+# dj_rest_auth.registration.views.SocialLoginView를 쓰려면 꼭 추가해줘야 함
 REST_USE_JWT = True
 
-# 기존의 username 필드가 있던 User 모델에서 email만 사용하도록 커스터마이징함
+# 기존의 username 필드가 있던 User 모델에서 email만 사용하도록 커스터마이징하기 위해 ACCOUNT_@@ 관련 설정해줌
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None    # username 필드 사용 x
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False

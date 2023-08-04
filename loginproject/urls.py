@@ -19,6 +19,9 @@ from django.urls import path, include
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path('user/', include('user.urls')),
+
+    path('user/', include('user.urls')),    # 커스텀 유저 모델
+    path('user/', include('allauth.urls')), # 추가한 라이브러리 매핑
+    
 ]
 

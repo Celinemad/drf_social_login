@@ -7,10 +7,24 @@ from rest_framework.response import Response
 from django.contrib.auth import authenticate
 from django.shortcuts import render, get_object_or_404
 from loginproject.settings import SECRET_KEY
+
 # UserViewSet
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from .serializers import *
+
+# 구글 로그인
+from django.shortcuts import redirect
+import os
+
+# google_callback
+from json import JSONDecodeError
+from django.http import JsonResponse
+import requests
+# import os
+# from rest_framework import status
+from .models import *
+from allauth.socialaccount.models import SocialAccount
 
 class RegisterAPIView(APIView):
     def post(self, request):
@@ -138,3 +152,37 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
 
 
+# 구글 소셜로그인 변수 설정
+state = os.environ.get('STATE')
+BASE_URL = 'http://localhost:8000/'
+GOOGLE_CALLBACK_URI = BASE_URL + 'user/google/callback/'
+
+# 구글 로그인
+def google_login(request):
+    scope = "https://www.googleapis.com/auth/userinfo.email"
+    client_id = os.environ.get("SOCIAL_AUTH_GOOGLE_CLIENT_ID")
+    
+    # 이 url로 들어가면 구글 로그인 창이 뜨고, 알맞은 아이디와 비번을 입력하면 callback URI로 코드값이 들어감
+    return redirect(f"https://accounts.google.com/o/auth2/v2/auth?client_id={client_id}&response_type=code&redirect_uri={GOOGLE_CALLBACK_URI}&scope={scope}")
+
+# access token & email 요청 -> 회원가입/로그인 & jwt 발급
+def google_callback(request):
+    client_id = os.environ.get('SOCIAL_AUTH_GOOGLE_CLIENT_ID')
+    client_secret = os.environ.get('SOCIAL_AUTH_GOOGLE_SECRET')
+    code = request.GET.get('code')
+
+    # 1. 받은 코드로 구글에 access token 요청
+    token_req = requests.post(f"https://oauth2.googleapis.com/token?client_id={client_id}&client_secret={client_secret}&code={code}&grant_type=authorization_code&redirect_uri={GOOGLE_CALLBACK_URI}&state={state}")
+
+    ### 1-1. json으로 변환 & 에러 부분 파싱
+    token_req_json = token_req.json()
+    error = token_req_json.get("error")
+
+    ### 1-2. 에러 발생 시 종료
+    if error is not None:
+        raise JSONDecodeError(error)
+    
+    ### 1-3. 성공 시 access_token 가져오기
+    access_token = token_req_json.get('access_token')
+    
+    #------------------------------------------------------------
